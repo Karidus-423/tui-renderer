@@ -1,20 +1,20 @@
 #include <math.h>
 #include <raylib.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 typedef struct Triangle {
-  Vector2 p1;
-  Vector2 p2;
-  Vector2 p3;
-} Triangle;
+  Vector2 a;
+  Vector2 b;
+  Vector2 c;
+} Polygon;
 
-void TUIDrawPoints(Triangle tri) {
-  DrawCircle(tri.p1.x, tri.p1.y, 3.0f, YELLOW);
-  DrawCircle(tri.p2.x, tri.p2.y, 3.0f, RED);
-  DrawCircle(tri.p3.x, tri.p3.y, 3.0f, GREEN);
-}
+typedef struct TUIModel {
+  Polygon *faces;
+} TUIModel;
 
-void TUIDrawLine(Vector2 a, Vector2 b, Color c) {
+void TUIDrawLine(Vector2 a, Vector2 b, Color color) {
   // Swap directions to always be left to right.
   bool steep = fabsf(a.y - b.y) > fabsf(a.x - b.x);
   if (steep) {
@@ -40,9 +40,9 @@ void TUIDrawLine(Vector2 a, Vector2 b, Color c) {
   int ierr = 0;
   for (int x = a.x; x <= b.x; ++x) {
     if (steep) {
-      DrawCircle(y, x, 3.0f, c);
+      DrawCircle(y, x, 3.0f, color);
     } else {
-      DrawCircle(x, y, 3.0f, c);
+      DrawCircle(x, y, 3.0f, color);
     }
 
     ierr += 2 * fabsf(b.y - a.y);
@@ -51,35 +51,48 @@ void TUIDrawLine(Vector2 a, Vector2 b, Color c) {
   }
 }
 
-Vector2 TUIRotatePoints(Vector2 p, double theta) {
-  Vector2 prime = p;
-  prime.x = p.x * cos(theta) - p.y * sin(theta);
-  prime.y = p.y * sin(theta) - p.y * cos(theta);
-  return prime;
+char *ReadFile(const char *filename) {
+  FILE *f = fopen(filename, "r");
+  if (!f) {
+    perror("fopen");
+  }
+  fseek(f, 0, SEEK_END);
+  long length = ftell(f);
+  rewind(f);
+  char *bfr = malloc(sizeof(char) * length);
+
+  fread(bfr, sizeof(char), length, f);
+
+  return bfr;
+}
+
+TUIModel ImportModel(const char *filename) {
+  // Count Vertices and Faces in filename
+  int verts, faces = 0;
+  char *v;
+  char *f;
+
+  char *bfr = ReadFile(filename);
+
+  printf("File: %s", bfr);
+
+  TUIModel model[faces];
+
+  return *model;
 }
 
 int main() {
-  const int screenWidth = 800;
-  const int screenHeight = 450;
-  InitWindow(screenWidth, screenHeight, "raylib [core] example - basic window");
+  const int screenWidth = 850;
+  const int screenHeight = 1200;
+  InitWindow(screenWidth, screenHeight, "Future TUI Renderer");
   SetTargetFPS(60);
 
-  Triangle tri = {
-      .p1 = {.x = screenWidth * 0.5, .y = screenHeight * 0.5},
-      .p2 = {.x = screenWidth * 0.69, .y = screenHeight * 0.7},
-      .p3 = {.x = screenWidth * 0.7, .y = screenHeight * 0.2},
-  };
+  TUIModel model = ImportModel("./spot/spot_triangulated.obj");
 
   double theta = 0;
   while (!WindowShouldClose()) {
     BeginDrawing();
     ClearBackground(DARKBLUE);
-
-    TUIDrawLine(tri.p1, tri.p2, PURPLE);
-    TUIDrawLine(tri.p2, tri.p3, ORANGE);
-    TUIDrawLine(tri.p3, tri.p1, LIME);
-
-    TUIDrawPoints(tri);
 
     DrawFPS(0, 0);
     EndDrawing();
