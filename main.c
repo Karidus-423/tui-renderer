@@ -1,25 +1,16 @@
+#include "import.h"
 #include <math.h>
 #include <raylib.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct Triangle {
-  Vector2 a;
-  Vector2 b;
-  Vector2 c;
-} Polygon;
-
-typedef struct TUIModel {
-  Polygon *faces;
-} TUIModel;
-
-void TUIDrawLine(Vector2 a, Vector2 b, Color color) {
+void TUIDrawLine(Vector3 a, Vector3 b, Color color) {
   // Swap directions to always be left to right.
   bool steep = fabsf(a.y - b.y) > fabsf(a.x - b.x);
   if (steep) {
-    Vector2 tmp_a = a;
-    Vector2 tmp_b = b;
+    Vector3 tmp_a = a;
+    Vector3 tmp_b = b;
 
     a.x = tmp_a.y;
     a.y = tmp_a.x;
@@ -49,36 +40,6 @@ void TUIDrawLine(Vector2 a, Vector2 b, Color color) {
     y += ((b.y > a.y ? 1 : -1) * (ierr > b.x - a.x));
     ierr -= 2 * (b.x - a.x) * (ierr > b.x - a.x);
   }
-}
-
-char *ReadFile(const char *filename) {
-  FILE *f = fopen(filename, "r");
-  if (!f) {
-    perror("fopen");
-  }
-  fseek(f, 0, SEEK_END);
-  long length = ftell(f);
-  rewind(f);
-  char *bfr = malloc(sizeof(char) * length);
-
-  fread(bfr, sizeof(char), length, f);
-
-  return bfr;
-}
-
-TUIModel ImportModel(const char *filename) {
-  // Count Vertices and Faces in filename
-  int verts, faces = 0;
-  char *v;
-  char *f;
-
-  char *bfr = ReadFile(filename);
-
-  printf("File: %s", bfr);
-
-  TUIModel model[faces];
-
-  return *model;
 }
 
 int main() {
